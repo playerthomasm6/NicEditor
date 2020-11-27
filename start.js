@@ -39,9 +39,9 @@ function start() {
         console.log(colors.green("You Selected " + answer.startOption));
         // VIEW ALL EMPLOYEES
         if (answer.startOption === "View All Employees") {
-            console.log("This is a placeholder for " + answer.startOption);
-            mainOrExit();
+            showAllEmployees();
         }
+
 
         else if (answer.startOption === "View All Employees By Departement") {
             console.log("This is a placeholder for " + answer.startOption);
@@ -54,13 +54,14 @@ function start() {
         }
 
         else if (answer.startOption === "Add Employee") {
-            console.log("This is a placeholder for " + answer.startOption);
-            mainOrExit();
+            console.log(colors.green(answer.startOption));
+            addEmployee();
         }
         
         else if (answer.startOption === "Remove Employee") {
-            console.log("This is a placeholder for " + answer.startOption);
-            mainOrExit();
+            console.log(colors.green(answer.startOption));
+
+            deleteEmployee(); // CALLS deleteEmployee which sends user to prompts
         }
         
         else if (answer.startOption === "Update Employee Role") {
@@ -124,219 +125,184 @@ function clearExit() { // FUNCTION THAT CLEARS THEN EXITS TERMINAL
 }
 
 function addEmployee() { // FUNCTION THAT ADDS AN EMPLOYEE TO THE EMPLOYEE TABLE
-    inquirer
-      .prompt([
+        console.clear();
+    connection.query("SELECT * FROM role", function(err, results) {
+        if (err) throw err;
+    
+    
+    inquirer.prompt([
         {
-          name: "item",
+          name: "first",
           type: "input",
-          message: "What is the item you would like to submit?"
+          message: "Enter the employee's fist name."
         },
         {
-          name: "category",
+          name: "last",
           type: "input",
-          message: "What category would you like to place your auction in?"
+          message: "Enter the employee's last name."
         },
         {
-          name: "startingBid",
-          type: "input",
-          message: "What would you like your starting bid to be?",
-          validate: function(value) {
-            if (isNaN(value) === false) {
-              return true;
-            }
-            return false;
+          name: "roleTitle",
+          type: "list",
+          message: "What position does this employee have?",
+          choices: function() {
+              var choiceArray = [];
+              for (var i = 0; i < results.length; i++) {
+                  choiceArray.push(results[i].title);
+              }
+              return choiceArray
           }
         }
       ])
       .then(function(answer) {
-        // when finished prompting, insert a new item into the db with that info
+        
+        var roleId;
+        for (var i = 0; i< results.length; i++) {
+            if (results[i].title === answer.roleTitle) {
+                roleId = results[i].id
+            }
+        }
         connection.query(
-          "INSERT INTO auctions SET ?",
+          "INSERT INTO employee SET ?",
           {
-            item_name: answer.item,
-            category: answer.category,
-            starting_bid: answer.startingBid || 0,
-            highest_bid: answer.startingBid || 0
+            first_name: answer.first,
+            last_name: answer.last,
+            role_id: roleId
           },
           function(err) {
             if (err) throw err;
-            console.log("Your auction was created successfully!");
-            // re-prompt the user for if they want to bid or post
-            start();
+            console.log("Employee Information is Saved");
+            mainOrExit();
           }
         );
       });
-  }
-
-
-
-
-
-
-
-
-
-
-// // =============================================================
-// // Sets up the Express App
-// // =============================================================
-// var app = express();
-// var PORT = process.env.PORT || 3000;
-
-
-// // Sets up the Express app to handle data parsing
-// // =============================================================
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
-// app.use(express.static(path.join(__dirname, '/public')));
-// console.log(__dirname);
-
-// // =============================================================
-
-
-// // Starts the server to begin listening
-// // =============================================================
-// app.listen(PORT, function() {
-//   console.log("App listening on PORT " + PORT);
-// });
-
-// let rawdata = fs.readFile("data/db.json", (err, data) => {
-//   if (err) throw err;
-//   let db = JSON.parse(data)
-//   console.log(db);
-// });
-
-
-
-// function which prompts the user for what action they should take
-// function start() {
-//     inquirer
-//       .prompt({
-//         name: "postOrBid",
-//         type: "list",
-//         message: "Would you like to [POST] an auction or [BID] on an auction?",
-//         choices: ["POST", "BID", "EXIT"]
-//       })
-//       .then(function(answer) {
-//         // based on their answer, either call the bid or the post functions
-//         if (answer.postOrBid === "POST") {
-//           postAuction();
-//         }
-//         else if(answer.postOrBid === "BID") {
-//           bidAuction();
-//         } else{
-//           connection.end();
-//         }
-//       });
-//   }
   
-//   // function to handle posting new items up for auction
-//   function postAuction() {
-//     // prompt for info about the item being put up for auction
-//     inquirer
-//       .prompt([
-//         {
-//           name: "item",
-//           type: "input",
-//           message: "What is the item you would like to submit?"
-//         },
-//         {
-//           name: "category",
-//           type: "input",
-//           message: "What category would you like to place your auction in?"
-//         },
-//         {
-//           name: "startingBid",
-//           type: "input",
-//           message: "What would you like your starting bid to be?",
-//           validate: function(value) {
-//             if (isNaN(value) === false) {
-//               return true;
-//             }
-//             return false;
-//           }
-//         }
-//       ])
-//       .then(function(answer) {
-//         // when finished prompting, insert a new item into the db with that info
-//         connection.query(
-//           "INSERT INTO auctions SET ?",
-//           {
-//             item_name: answer.item,
-//             category: answer.category,
-//             starting_bid: answer.startingBid || 0,
-//             highest_bid: answer.startingBid || 0
-//           },
-//           function(err) {
-//             if (err) throw err;
-//             console.log("Your auction was created successfully!");
-//             // re-prompt the user for if they want to bid or post
-//             start();
-//           }
-//         );
-//       });
-//   }
+    })
+    }
+
+function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE TABLE (NEED TO ADD THE REST OF THE OPTIONS)
+    console.clear();
+    connection.query("SELECT * FROM employee", function(err, results) {
+        if (err) throw err;
+    
+    
+    inquirer.prompt([
+        {
+          name: "search",
+          type: "list",
+          message: "How do you want to search for the employee to delete?",
+          choices: ["By first name", "By last name", "By employee role", "All Employees", "Main Menu"]
+        },
+      ])
+      .then(function searchEmployeeDelete(answer) {
+            
+        
+        if (answer.search === "By first name") {
+            inquirer.prompt([
+                {
+                    name:"firstSearch",
+                    type: "list",
+                    message: "Which employee will you select?",
+                    choices: function(){
+                        var choiceArray = [];
+                        for (var i = 0; i < results.length; i++) {
+                          choiceArray.push(results[i].first_name);
+                        }
+                        return choiceArray;
+                    }
+                }
+            ])
+            .then(function(answer){
+                let employeeFirst = answer.firstSearch
+                connection.query("DELETE FROM employee WHERE ?", 
+                {
+                    first_name: employeeFirst
+                },
+                function(err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " was deleted! \n")
+                
+            });
+                
+        })} 
+        // ____________________________________________________________
+        // DELETE BY LAST NAME
+        
+        else if (answer.search === "By last name") {
+            inquirer.prompt([
+                {
+                    name:"lastSearch",
+                    type: "list",
+                    message: "Which employee will you select?",
+                    choices: function(){
+                        var choiceArray = [];
+                        for (var i = 0; i < results.length; i++) {
+                          choiceArray.push(results[i].last_name);
+                        }
+                        return choiceArray;
+                    }
+                }
+            ])
+            .then(function(answer){
+                let employeeLast = answer.lastSearch
+                connection.query("DELETE FROM employee WHERE ?",
+                {
+                    last_name: employeeLast
+                },
+                function(err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " was deleted! \n")
+                
+            })
+        })}
+        
+        else if (answer.search === "By employee role") {
+            
+        } 
+        
+        else if (answer.search === "All Employees") {
+            
+        }
+
+        else if (answer.search === "Main Menue") {
+            start();
+        }
+
+        
+      });
   
-//   function bidAuction() {
-//     // query the database for all items being auctioned
-//     connection.query("SELECT * FROM auctions", function(err, results) {
-//       if (err) throw err;
-//       // once you have the items, prompt the user for which they'd like to bid on
-//       inquirer
-//         .prompt([
-//           {
-//             name: "choice",
-//             type: "rawlist",
-//             choices: function() {
-//               var choiceArray = [];
-//               for (var i = 0; i < results.length; i++) {
-//                 choiceArray.push(results[i].item_name);
-//               }
-//               return choiceArray;
-//             },
-//             message: "What auction would you like to place a bid in?"
-//           },
-//           {
-//             name: "bid",
-//             type: "input",
-//             message: "How much would you like to bid?"
-//           }
-//         ])
-//         .then(function(answer) {
-//           // get the information of the chosen item
-//           var chosenItem;
-//           for (var i = 0; i < results.length; i++) {
-//             if (results[i].item_name === answer.choice) {
-//               chosenItem = results[i];
-//             }
-//           }
-  
-//           // determine if bid was high enough
-//           if (chosenItem.highest_bid < parseInt(answer.bid)) {
-//             // bid was high enough, so update db, let the user know, and start over
-//             connection.query(
-//               "UPDATE auctions SET ? WHERE ?",
-//               [
-//                 {
-//                   highest_bid: answer.bid
-//                 },
-//                 {
-//                   id: chosenItem.id
-//                 }
-//               ],
-//               function(error) {
-//                 if (error) throw err;
-//                 console.log("Bid placed successfully!");
-//                 start();
-//               }
-//             );
-//           }
-//           else {
-//             // bid wasn't high enough, so apologize and start over
-//             console.log("Your bid was too low. Try again...");
-//             start();
-//           }
-//         });
-//     });
-//   }
-  
+    }
+    )}
+
+function showAllEmployees(){
+    console.clear();
+    connection.query("SELECT * FROM employee", function(err, results) {
+        if (err) throw err;
+        let allEmployees = [];
+        for (i = 0; i < results.length; i++) {
+            let allEmployeeObj = {
+            first_name: results[i].first_name,
+            last_name: results[i].last_name,
+            role_id: results[i].role_id
+            }
+            allEmployees.push(allEmployeeObj);
+        }
+        console.table(allEmployees);
+        inquirer.prompt([
+            {
+                name: "menu",
+                type: "confirm",
+                message: "Press 'enter' to go back to the main menu",
+                default: true
+            }
+        ])
+        .then(function(answer){
+            if (answer.menu) {
+            mainOrExit();
+            } else {
+                mainOrExit();
+            }
+        })
+
+});
+}
