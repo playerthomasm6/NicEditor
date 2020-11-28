@@ -22,10 +22,11 @@ connection.connect(function(err) {
 
 function start() {
     console.clear();
-    console.log(colors.green("____________________________________"));
-    console.log(colors.green("Welcome to Employee Manager"));
-    console.log(colors.green("____________________________________"));
-    console.log(colors.green("                                    "));
+    console.log(colors.green(" ____________________________________ "));
+    console.log(colors.green("|                                    |"));
+    console.log(colors.green("|    Welcome to Employee Manager     |"));
+    console.log(colors.green("|____________________________________|"));
+    console.log(colors.green("                                      "));
     inquirer.prompt({
     
         name: "startOption",
@@ -38,45 +39,42 @@ function start() {
         console.clear();
         console.log(colors.green("You Selected " + answer.startOption));
         // VIEW ALL EMPLOYEES
-        if (answer.startOption === "View All Employees") {
+        if (answer.startOption === "View All Employees") { // CALLS showAllEmployees()
             showAllEmployees();
         }
 
 
         else if (answer.startOption === "View All Employees By Departement") {
-            console.log("This is a placeholder for " + answer.startOption);
+            console.log("The option to " + answer.startOption + " has not been added yet");
             mainOrExit();
         } 
         
         else if (answer.startOption === "View All Employeees By Manager") {
-            console.log("This is a placeholder for " + answer.startOption);
+            console.log("The option to " + answer.startOption + " has not been added yet");
             mainOrExit();
         }
 
-        else if (answer.startOption === "Add Employee") {
+        else if (answer.startOption === "Add Employee") { // CALLS addEmployee()
             console.log(colors.green(answer.startOption));
             addEmployee();
         }
         
-        else if (answer.startOption === "Remove Employee") {
-            console.log(colors.green(answer.startOption));
-
-            deleteEmployee(); // CALLS deleteEmployee which sends user to prompts
+        else if (answer.startOption === "Remove Employee") { // CALLS deleteEmployee which sends user to prompts
+            deleteEmployee(); 
         }
         
         else if (answer.startOption === "Update Employee Role") {
-            console.log("This is a placeholder for " + answer.startOption);
+            console.log("The option to " + answer.startOption + " has not been added yet");
             mainOrExit();
         }
         
         else if (answer.startOption === "Update Employee Manager") {
-            console.log("This is a placeholder for " + answer.startOption);
+            console.log("The option to " + answer.startOption + " has not been added yet");
             mainOrExit();
         }
         
         else {
-            console.clear();
-            process.exit();
+            mainOrExit();
         }
     });
 }
@@ -110,8 +108,16 @@ function mainOrExit() { // FUNCTION THAT PROMPTS FOR MAIN MENUE OR EXIT
             .then(function (answers) {
                 if (answers.sure === "Yes") {
                     console.clear()
-                    console.log(colors.red("Goodbye"))
-                    setTimeout(clearExit, 2000)
+                    console.log(colors.green("     _______________"))
+                    console.log(colors.green("    |,----------.  | "))
+                    console.log(colors.green("    ||           |=| |"))
+                    console.log(colors.green("    ||  Goodbye || | |"))
+                    console.log(colors.green("    ||       . _o| | | __"))
+                    console.log(colors.green("    |`-----------' |/ /~/"))
+                    console.log(colors.green("     ~~~~~~~~~~~~~~~ / /"))
+                    console.log(colors.green("                     ~~"))
+                    console.log(colors.green("Art by Ojoshiro"))
+                    setTimeout(clearExit, 3000)
                 } else {
                     start();
             }
@@ -191,80 +197,39 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
           name: "search",
           type: "list",
           message: "How do you want to search for the employee to delete?",
-          choices: ["By first name", "By last name", "By employee role", "All Employees", "Main Menu"]
+          choices: ["By first name", "By last name", "By employee role", "Main Menu"]
         },
       ])
       .then(function searchEmployeeDelete(answer) {
             
-        
+        // ____________________________________________________________
+        // DELETE BY FIRST NAME
+
         if (answer.search === "By first name") {
-            inquirer.prompt([
-                {
-                    name:"firstSearch",
-                    type: "list",
-                    message: "Which employee will you select?",
-                    choices: function(){
-                        var choiceArray = [];
-                        for (var i = 0; i < results.length; i++) {
-                          choiceArray.push(results[i].first_name);
-                        }
-                        return choiceArray;
-                    }
-                }
-            ])
-            .then(function(answer){
-                let employeeFirst = answer.firstSearch
-                connection.query("DELETE FROM employee WHERE ?", 
-                {
-                    first_name: employeeFirst
-                },
-                function(err, res) {
-                    if (err) throw err;
-                    console.log(res.affectedRows + " was deleted! \n")
-                
-            });
-                
-        })} 
+            var key1 = "first_name";
+            var key2 = "last_name";
+            var key3 = "role_id";
+            searchBy(results, key1, key2, key3);
+        } 
+
         // ____________________________________________________________
         // DELETE BY LAST NAME
         
         else if (answer.search === "By last name") {
-            inquirer.prompt([
-                {
-                    name:"lastSearch",
-                    type: "list",
-                    message: "Which employee will you select?",
-                    choices: function(){
-                        var choiceArray = [];
-                        for (var i = 0; i < results.length; i++) {
-                          choiceArray.push(results[i].last_name);
-                        }
-                        return choiceArray;
-                    }
-                }
-            ])
-            .then(function(answer){
-                let employeeLast = answer.lastSearch
-                connection.query("DELETE FROM employee WHERE ?",
-                {
-                    last_name: employeeLast
-                },
-                function(err, res) {
-                    if (err) throw err;
-                    console.log(res.affectedRows + " was deleted! \n")
-                
-            })
-        })}
+            var key1 = "last_name";
+            var key2 = "first_name";
+            var key3 = "role_id";
+            searchBy(results, key1, key2, key3);
+        }
         
         else if (answer.search === "By employee role") {
-            
+            var key1 = "role_id";
+            var key2 = "first_name";
+            var key3 = "last_name";
+            searchBy(results, key1, key2, key3);
         } 
         
-        else if (answer.search === "All Employees") {
-            
-        }
-
-        else if (answer.search === "Main Menue") {
+        else if (answer.search === "Main Menu") {
             start();
         }
 
@@ -272,7 +237,9 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
       });
   
     }
-    )}
+    )
+
+}
 
 function showAllEmployees(){
     console.clear();
@@ -305,4 +272,38 @@ function showAllEmployees(){
         })
 
 });
+}
+
+function searchBy(results, key1, key2, key3) {
+    inquirer.prompt([
+        {
+            name:"searchBy",
+            type: "list",
+            message: "Which employee will you select?",
+            choices: function(){
+                var choiceArray = [];
+                for (var i = 0; i < results.length; i++) {
+                    let employee = (results[i][key1] + ", " + results[i][key2] + ", " + results[i][key3]);
+                  choiceArray.push(employee);
+                }
+                return choiceArray;
+            }
+        }
+    ])
+    .then(function(answer){
+          console.log(answer);
+                let employeeData = answer.searchBy;
+                let employeeDataArray = employeeData.split(","); 
+                console.log(employeeDataArray[0]);
+                connection.query("DELETE FROM employee WHERE ?", 
+                {
+                    [key1]: employeeDataArray[0]
+                },
+                function(err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " was deleted! \n")
+                    mainOrExit();  
+            });
+            
+        }) 
 }
