@@ -32,7 +32,7 @@ function start() {
         name: "startOption",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "Exit"]
+        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Add New Role", "Update Employee Manager", "Exit"]
     
     }).then(function(answer) { // IF ELSE STATESMENTS TO NAVIGATE THROUGH THE MAIN MENU
         // USER ANSWER IS USED TO MOVE TO NEXT FUNCTION
@@ -69,6 +69,11 @@ function start() {
         // _____________________________________________________________________________
         else if (answer.startOption === "Update Employee Role") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
             updateRole();
+        }
+
+        // _____________________________________________________________________________
+        else if (answer.startOption === "Add New Role") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
+            addRole();
         }
         
         else if (answer.startOption === "Update Employee Manager") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
@@ -214,7 +219,7 @@ function addRole() {
           choices: function() {
               var choiceArray = [];
               for (var i = 0; i < results.length; i++) {
-                  choiceArray.push(results[i].title);
+                  choiceArray.push(results[i].name);
               }
               return choiceArray
           }
@@ -224,7 +229,7 @@ function addRole() {
         
         var departmentId;
         for (var i = 0; i< results.length; i++) {
-            if (results[i].title === answer.departmentTitle) {
+            if (results[i].name === answer.departmentTitle) {
                 departmentId = results[i].id
             }
         }
