@@ -32,7 +32,7 @@ function start() {
         name: "startOption",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Add New Role", "Update Employee Manager", "Exit"]
+        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Remove Role", "Add New Role", "Update Employee Manager", "Exit"]
     
     }).then(function(answer) { // IF ELSE STATESMENTS TO NAVIGATE THROUGH THE MAIN MENU
         // USER ANSWER IS USED TO MOVE TO NEXT FUNCTION
@@ -74,6 +74,11 @@ function start() {
         // _____________________________________________________________________________
         else if (answer.startOption === "Add New Role") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
             addRole();
+        }
+
+        // _____________________________________________________________________________
+        else if (answer.startOption === "Remove Role") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
+            deleteRole();
         }
         
         else if (answer.startOption === "Update Employee Manager") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
@@ -300,6 +305,39 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
 
         
       });
+  
+    }
+    )
+
+}
+
+function deleteRole() {
+    console.clear();
+    connection.query("SELECT * FROM role", function(err, results) {
+        if (err) throw err;
+    
+    inquirer.prompt([
+        {
+          name: "roleDelete",
+          type: "list",
+          message: "Which role would you like to delete?",
+          choices: function () {
+          var choiceArray = [];
+          for (var i = 0; i < results.length; i++) {
+              choiceArray.push(results[i].title);
+          }
+          return choiceArray
+        }
+    },
+      ])
+      .then(function (answer) {
+            connection.query("DELETE FROM role WHERE title = ?", [answer.roleDelete],
+            function(err, res) {
+            if (err) throw err;
+            console.log(answer.roleDelete + " was deleted! \n")
+            mainOrExit();  
+        })
+        });
   
     }
     )
