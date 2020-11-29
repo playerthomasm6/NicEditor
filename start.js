@@ -32,7 +32,7 @@ function start() {
         name: "startOption",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role", "Remove Role", "Add New Role", "Update Employee Manager", "Exit"]
+        choices: ["View All Employees", "View All Employees By Department", "View All Employeees By Manager", "Add Employee", "Remove Employee", "Update Employee Role",  "Add New Role", "Remove Role", "Add New Department", "Remove Department", "Update Employee Manager", "Exit"]
     
     }).then(function(answer) { // IF ELSE STATESMENTS TO NAVIGATE THROUGH THE MAIN MENU
         // USER ANSWER IS USED TO MOVE TO NEXT FUNCTION
@@ -77,8 +77,18 @@ function start() {
         }
 
         // _____________________________________________________________________________
-        else if (answer.startOption === "Remove Role") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
+        else if (answer.startOption === "Remove Role") { // CALLS FUNCTION deleteRole()
             deleteRole();
+        }
+
+        // _____________________________________________________________________________
+        else if (answer.startOption === "Add New Department") { // CALLS FUNCTION addDepartment()
+            addDepartment();
+        }
+
+        // _____________________________________________________________________________
+        else if (answer.startOption === "Remove Department") { // CALLS FUNCTION deleteDepartment()
+            deleteDepartment();
         }
         
         else if (answer.startOption === "Update Employee Manager") { // DISPLAYS A MESSAGE STATING THAT THE FEATURE HAS NOT BEEN IMPLEMENTED YET
@@ -200,7 +210,7 @@ function addEmployee() { // FUNCTION THAT ADDS AN EMPLOYEE TO THE EMPLOYEE TABLE
     })
 }
 
-function addRole() {
+function addRole() { // THIS FUNCTION ADDS ROLES
     console.clear();
     connection.query("SELECT * FROM department", function(err, results) {
         if (err) throw err;
@@ -255,6 +265,32 @@ function addRole() {
   
     })
 }
+
+function addDepartment() {
+    console.clear();
+    inquirer.prompt([  
+        {
+          name: "name",
+          type: "input",
+          message: "Enter the title of the department."
+        },
+      ])
+      .then(function(answer) {
+        connection.query(
+          "INSERT INTO department SET ?",
+          {
+            name: answer.name,
+          },
+          function(err) {
+            if (err) throw err;
+            console.log("New Department Information is Saved");
+            mainOrExit();
+          }
+        );
+      });
+  
+    }
+
 
 function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE TABLE (NEED TO ADD THE REST OF THE OPTIONS)
     console.clear();
@@ -311,7 +347,7 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
 
 }
 
-function deleteRole() {
+function deleteRole() {  // FUNCTION THAT DELETS ROLES
     console.clear();
     connection.query("SELECT * FROM role", function(err, results) {
         if (err) throw err;
@@ -574,25 +610,8 @@ function showEmployeeByDept(){
                 }
             }
         ]).then(function (answer) {
-            if (answer.dept === "Sales") {
-                salesDept();
-            } 
-            else if (answer.dept === "Engineering") {
-                engineeringDept();
-            }
-        
-            else if (answer.dept === "Legal") {
-                legalDept();
-            }
-        
-            else if (answer.dept === "Human Resources") {
-                humanResourcesDept();
-            }
-        
-            else if (answer.dept === "Warehouse") {
-                warehouseDept();
-            }
-    
+                var department = answer.dept
+                selectDept(department);
         })
 
     })
@@ -601,44 +620,8 @@ function showEmployeeByDept(){
     
 }
 
-function salesDept() { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE SALES DEPARTMENT IN A TABLE
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Sales';",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            mainOrExit();
-        })
-}
-
-function engineeringDept() { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE ENGINEERING DEPARTMENT IN A TABLE
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Engineering';",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            mainOrExit();
-        })
-}
-
-function humanResourcesDept() { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE HUMAN RESOURCES DEPARTMENT IN A TABLE
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Human Resources';",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            mainOrExit();
-        })
-}
-
-function warehouseDept() { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE WAREHOUSE DEPARTMENT IN A TABLE
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Warehouse';",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            mainOrExit();
-        })
-}
-
-function legalDept() { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE LEGAL DEPARTMENT IN A TABLE
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Legal';",
+function selectDept(department) { // FUNCTION THAT DISPLAYS ALL EMPLOYEES FROM THE SALES DEPARTMENT IN A TABLE
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = ?;",[department],
         function (err, res) {
             if (err) throw err
             console.table(res)
