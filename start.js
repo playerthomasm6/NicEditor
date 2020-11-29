@@ -44,9 +44,9 @@ function start() {
         }
 
 
-        else if (answer.startOption === "View All Employees By Departement") {
+        else if (answer.startOption === "View All Employees By Department") {
             console.log("The option to " + answer.startOption + " has not been added yet");
-            mainOrExit();
+            salesDept();
         } 
         
         else if (answer.startOption === "View All Employeees By Manager") {
@@ -206,9 +206,9 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
         // DELETE BY FIRST NAME
 
         if (answer.search === "By first name") {
-            var key1 = "first_name";
-            var key2 = "last_name";
-            var key3 = "role_id";
+            let key1 = "first_name";
+            let key2 = "last_name";
+            let key3 = "role_id";
             searchBy(results, key1, key2, key3);
         } 
 
@@ -216,16 +216,16 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
         // DELETE BY LAST NAME
         
         else if (answer.search === "By last name") {
-            var key1 = "last_name";
-            var key2 = "first_name";
-            var key3 = "role_id";
+            let key1 = "last_name";
+            let key2 = "first_name";
+            let key3 = "role_id";
             searchBy(results, key1, key2, key3);
         }
         
         else if (answer.search === "By employee role") {
-            var key1 = "role_id";
-            var key2 = "first_name";
-            var key3 = "last_name";
+            let key1 = "role_id";
+            let key2 = "first_name";
+            let key3 = "last_name";
             searchBy(results, key1, key2, key3);
         } 
         
@@ -243,35 +243,12 @@ function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE
 
 function showAllEmployees(){
     console.clear();
-    connection.query("SELECT * FROM employee", function(err, results) {
-        if (err) throw err;
-        let allEmployees = [];
-        for (i = 0; i < results.length; i++) {
-            let allEmployeeObj = {
-            first_name: results[i].first_name,
-            last_name: results[i].last_name,
-            role_id: results[i].role_id
-            }
-            allEmployees.push(allEmployeeObj);
-        }
-        console.table(allEmployees);
-        inquirer.prompt([
-            {
-                name: "menu",
-                type: "confirm",
-                message: "Press 'enter' to go back to the main menu",
-                default: true
-            }
-        ])
-        .then(function(answer){
-            if (answer.menu) {
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+        function (err, res) {
+            if (err) throw err
+            console.table(res)
             mainOrExit();
-            } else {
-                mainOrExit();
-            }
         })
-
-});
 }
 
 function searchBy(results, key1, key2, key3) {
@@ -283,7 +260,7 @@ function searchBy(results, key1, key2, key3) {
             choices: function(){
                 var choiceArray = [];
                 for (var i = 0; i < results.length; i++) {
-                    let employee = (results[i][key1] + ", " + results[i][key2] + ", " + results[i][key3]);
+                    let employee = (results[i][key1] + "," + results[i][key2] + "," + results[i][key3]);
                   choiceArray.push(employee);
                 }
                 return choiceArray;
@@ -293,17 +270,43 @@ function searchBy(results, key1, key2, key3) {
     .then(function(answer){
           console.log(answer);
                 let employeeData = answer.searchBy;
+                console.log(employeeData);
                 let employeeDataArray = employeeData.split(","); 
-                console.log(employeeDataArray[0]);
-                connection.query("DELETE FROM employee WHERE ?", 
-                {
-                    [key1]: employeeDataArray[0]
-                },
-                function(err, res) {
+                
+                if (key1 === "first_name") {
+                    connection.query("DELETE FROM employee WHERE first_name = ? AND last_name = ?", [employeeDataArray[0], employeeDataArray[1]],
+                    function(err, res) {
                     if (err) throw err;
-                    console.log(res.affectedRows + " was deleted! \n")
+                    console.log(employeeDataArray[0] + " " + employeeDataArray[1] + " was deleted! \n")
                     mainOrExit();  
-            });
+                })
+                } 
+                else if (key1 === "last_name") {
+                    connection.query("DELETE FROM employee WHERE first_name = ? AND last_name = ?", [employeeDataArray[1], employeeDataArray[0]],
+                    function(err, res) {
+                    if (err) throw err;
+                    console.log(employeeDataArray[1] + " " + employeeDataArray[0] + " was deleted! \n")
+                    mainOrExit();  
+                })
+                } 
+                else if (key1 === "role_id") {
+                    connection.query("DELETE FROM employee WHERE first_name = ? AND last_name = ?", [employeeDataArray[1], employeeDataArray[2]],
+                    function(err, res) {
+                    if (err) throw err;
+                    console.log(employeeDataArray[1] + " " +  employeeDataArray[2] + " was deleted! \n")
+                    mainOrExit();  
+                })
+            }
             
         }) 
+}
+
+
+function salesDept() {
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id WHERE name = 'Sales';",
+        function (err, res) {
+            if (err) throw err
+            console.table(res)
+            mainOrExit();
+        })
 }
