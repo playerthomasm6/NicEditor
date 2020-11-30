@@ -291,7 +291,6 @@ function addDepartment() {
   
     }
 
-
 function deleteEmployee() { // FUNCTION THAT DELETES AN EMPLOYEE IN THE EMPLOYEE TABLE (NEED TO ADD THE REST OF THE OPTIONS)
     console.clear();
     connection.query("SELECT * FROM employee", function(err, results) {
@@ -380,6 +379,38 @@ function deleteRole() {  // FUNCTION THAT DELETS ROLES
 
 }
 
+function deleteDepartment() {
+    console.clear();
+    connection.query("SELECT * FROM department", function(err, results) {
+        if (err) throw err;
+    
+    inquirer.prompt([
+        {
+          name: "departmentDelete",
+          type: "list",
+          message: "Which department would you like to delete?",
+          choices: function () {
+          var choiceArray = [];
+          for (var i = 0; i < results.length; i++) {
+              choiceArray.push(results[i].name);
+          }
+          return choiceArray
+        }
+    },
+      ])
+      .then(function (answer) {
+            connection.query("DELETE FROM department WHERE name = ?", [answer.departmentDelete],
+            function(err, res) {
+            if (err) throw err;
+            console.log(answer.departmentDelete + " was deleted! \n")
+            mainOrExit();  
+        })
+        });
+  
+    }
+    )
+}
+
 function searchBy(results, key1, key2, key3) { // USED TO SELECT EMPLOYEE BY FIRST NAME, LAST NAME, AND ROLL ID
     inquirer.prompt([
         {
@@ -443,9 +474,6 @@ inquirer.prompt([
     },
   ])
   .then(function searchEmployeeDelete(answer) {
-        
-    // ____________________________________________________________
-    // DELETE BY FIRST NAME
 
     if (answer.search === "By first name") {
         let key1 = "first_name";
@@ -453,9 +481,6 @@ inquirer.prompt([
         let key3 = "role_id";
         searchByUpdate(results, key1, key2, key3);
     } 
-
-    // ____________________________________________________________
-    // DELETE BY LAST NAME
     
     else if (answer.search === "By last name") {
         let key1 = "last_name";
